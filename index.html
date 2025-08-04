@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JOHNNY TO-DO LIST</title>
+   <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="container">
+    
+    <h1>TO-DO LIST</h1>
+
+    <input type="text" id="task-input" placeholder="Enter a task..." />
+
+    <button id="add-button">ADD TASK</button>
+
+    <ul id="task-list"></ul>
+
+    <button id="delete-items">Delete Items</button>
+
+  </div>
+
+  <script>
+
+    let TaskInput = document.getElementById('task-input')
+    let AddButton = document.getElementById('add-button')
+    let TaskList = document.getElementById('task-list')
+    let DeleteButton = document.getElementById('delete-items')
+
+    AddButton.addEventListener('click', AddTask)
+    TaskInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') AddTask()
+    })
+
+    function AddTask() {
+      let TaskText = TaskInput.value.trim()
+      if (TaskText === '') return;
+
+      let li = document.createElement('li')
+      li.textContent = TaskText
+
+      li.addEventListener('click', function (e) {
+        e.stopPropagation()
+        li.classList.toggle('completed')
+      })
+
+      let deleteItemButton = document.createElement('button')
+      deleteItemButton.textContent = '❌'
+
+      deleteItemButton.addEventListener('click', function () {
+        TaskList.removeChild(li)
+
+      })
+
+      li.appendChild(deleteItemButton)
+      TaskList.appendChild(li)
+      TaskInput.value = ''
+
+      // Show delete button if list has at least one item
+      if (TaskList.children.length > 0) {
+        DeleteButton.style.display = 'inline'
+      }
+    }
+
+    DeleteButton.addEventListener('click', function () {
+      TaskList.innerHTML = ''
+      DeleteButton.style.display = 'none'
+    })
+  </script>
+</body>
+</html>
