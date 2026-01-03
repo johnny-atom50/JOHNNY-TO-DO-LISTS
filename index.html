@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>JOHNNY TO-DO LIST</title>
-   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
@@ -23,52 +24,105 @@
 
   </div>
 
-  <script>
+  
+<script>
 
-    let TaskInput = document.getElementById('task-input')
-    let AddButton = document.getElementById('add-button')
-    let TaskList = document.getElementById('task-list')
-    let DeleteButton = document.getElementById('delete-items')
+  let TaskInput = document.getElementById('task-input')
+  let AddButton = document.getElementById('add-button')
+  let TaskList = document.getElementById('task-list')
+  let DeleteButton = document.getElementById('delete-items')
 
-    AddButton.addEventListener('click', AddTask)
-    TaskInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') AddTask()
-    })
+  AddButton.addEventListener('click', AddTask)
+  TaskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') AddTask()
+  })
 
-    function AddTask() {
-      let TaskText = TaskInput.value.trim()
-      if (TaskText === '') return;
 
-      let li = document.createElement('li')
-      li.textContent = TaskText
+  // ================== ADDED: LOCAL STORAGE SETUP ==================
+  let savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
-      li.addEventListener('click', function (e) {
-        e.stopPropagation()
-        li.classList.toggle('completed')
-      })
+  function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(savedTasks));
+  }
+  // ================================================================
 
-      let deleteItemButton = document.createElement('button')
-      deleteItemButton.textContent = '❌'
+  // ================== ADDED: LOAD TASKS ON PAGE LOAD ===============
+  function loadTasks() {
+    savedTasks.forEach(task => {
+      createTask(task.text, task.completed);
+    });
 
-      deleteItemButton.addEventListener('click', function () {
-        TaskList.removeChild(li)
+    if (savedTasks.length > 0) {
+      DeleteButton.style.display = 'inline';
+    }
+  }
+  // ================================================================
 
-      })
+  // ================== EDITED: AddTask FUNCTION ====================
+  function AddTask() {
+    let TaskText = TaskInput.value.trim()
 
-      li.appendChild(deleteItemButton)
-      TaskList.appendChild(li)
-      TaskInput.value = ''
-
-      // Show delete button if list has at least one item
-      if (TaskList.children.length > 0) {
-        DeleteButton.style.display = 'inline'
-      }
+    if(TaskText==='') {
+      alert("input a task");
+      return;
     }
 
-    DeleteButton.addEventListener('click', function () {
-      TaskList.innerHTML = ''
-      DeleteButton.style.display = 'none'
+    let newTask = { text: TaskText, completed: false };
+    savedTasks.push(newTask);
+    saveTasks();
+    createTask(TaskText, false);
+    TaskInput.value = '';
+  }
+  // ================================================================
+
+  // ================== ADDED: TASK CREATOR FUNCTION =================
+  function createTask(text, completed) {
+    let li = document.createElement('li')
+    li.textContent = text
+
+    if (completed) li.classList.add('completed')
+
+    li.addEventListener('click', function (e) {
+      e.stopPropagation()
+      li.classList.toggle('completed')
+
+      let index = [...TaskList.children].indexOf(li)
+      savedTasks[index].completed = li.classList.contains('completed')
+      saveTasks()
     })
-  </script>
-</body>
-</html>
+
+    let deleteItemButton = document.createElement('button')
+    deleteItemButton.textContent = '❌'
+
+    deleteItemButton.addEventListener('click', function () {
+      let index = [...TaskList.children].indexOf(li)
+      savedTasks.splice(index, 1)
+      saveTasks()
+      TaskList.removeChild(li)
+
+      if (savedTasks.length === 0) {
+        DeleteButton.style.display = 'none'
+      }
+    })
+
+    li.appendChild(deleteItemButton)
+    TaskList.appendChild(li)
+
+    DeleteButton.style.display = 'inline'
+  }
+  // ================================================================
+
+  // ================== EDITED: DELETE ALL BUTTON ===================
+  DeleteButton.addEventListener('click', function () {
+    TaskList.innerHTML = ''
+    savedTasks = []
+    saveTasks()
+    DeleteButton.style.display = 'none'
+  })
+  // ================================================================
+
+  // ================== ADDED: AUTO LOAD ============================
+  loadTasks()
+  // ================================================================
+
+</script>
